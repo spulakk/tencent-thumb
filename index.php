@@ -99,18 +99,38 @@
 
     <?php
         require __DIR__ . '/vendor/autoload.php';
-        
+var_dump($_SERVER['REMOTE_ADDR']);die;
         $error = null;
 
         if(!empty($_FILES['image']['name']))
         {
+            if($_POST['size'] == 'full')
+            {
+                $targetWidth = 1920;
+                $targetHeight = 1080;
+                $ratio = 1.78;
+                $name = 'img';
+            }
+            else
+            {
+                $targetWidth = 220;
+                $targetHeight = 150;
+                $ratio = 1.47;
+                $name = 'thumb';
+            }
+
+            if(!empty($_POST['name']))
+            {
+                $name = $_POST['name'];
+            }
+
             $img = $_FILES['image'];
 
             $validExtensionArray = ['jpeg', 'jpg', 'png'];
 
             $fileNameArray = explode('.', $img['name']);
             $fileExtension = end($fileNameArray);
-            $fileName = __DIR__ . DIRECTORY_SEPARATOR . 'img.' . $fileExtension;
+            $fileName = __DIR__ . DIRECTORY_SEPARATOR . $name . '.' . $fileExtension;
 
             if(!in_array($fileExtension, $validExtensionArray))
             {
@@ -136,26 +156,6 @@
 
             if(!isset($error))
             {
-                if($_POST['size'] == 'full')
-                {
-                    $targetWidth = 1920;
-                    $targetHeight = 1080;
-                    $ratio = 1.78;
-                    $name = 'img';
-                }
-                else
-                {
-                    $targetWidth = 220;
-                    $targetHeight = 150;
-                    $ratio = 1.47;
-                    $name = 'thumb';
-                }
-
-                if(!empty($_POST['name']))
-                {
-                    $name = $_POST['name'];
-                }
-
                 if($_POST['type'] == 'crop')
                 {
                     $width = $imagick->getImageGeometry()['width'];
@@ -189,7 +189,14 @@
                 ob_clean();
                 flush();
 
-                readfile('http://localhost/tencent_thumb/img.' . $fileExtension);
+                if(in_array($_SERVER['REMOTE_ADDR'], ['::1', '127.0.0.1']))
+                {
+                    readfile('http://localhost/tencent_thumb/img.' . $fileExtension);
+                }
+                else
+                {
+                    readfile('https://tencent-thumb.herokuapp.com/' . $name . '.' . $fileExtension);
+                }
 
                 unlink($fileName);
 
