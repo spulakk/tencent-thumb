@@ -57,26 +57,43 @@
 
 <body>
     <div class="container">
-        <h1 class="text-center my-5">Tencent Thumbnail Maker</h1>
+        <h1 class="text-center my-5">Tencent Image Maker</h1>
 
         <div class="text-center">
-            <p>Click the field and choose an image, then click "Submit" to get a 220x150 version of it which can be used as a thumbnail in Tencent competitions.</p>
+            <p>Click the field and choose an image, then click "Submit" to resize it for use in Tencent competitions.</p>
             <p>Supported image formats: JPG, JPEG, PNG</p>
             <p>In case of any issues, please contact <span class="text-primary">Pure Electricity#1796</span> on Discord.</p>
         </div>
 
         <form method="post" action="" enctype="multipart/form-data" id="image-form" class="my-5">
-            <div class="form-group p-4" style="background-color: #f2f2f2;">
+            <div class="form-group p-4 mb-4" style="background-color: #f2f2f2;">
                 <input type="file" name="image" id="image">
             </div>
 
-            <input type="radio" id="crop" name="type" value="crop" checked="checked">
-            <label for="crop" class="m-0"><b>Crop</b> (recommended, cuts off the edges if aspect ratio is not correct)</label>
-            <br>
-            <input type="radio" id="fit" name="type" value="fit">
-            <label for="fit" class="m-0"><b>Fit</b> (stretches the image vertically or horizontally if aspect ratio is not correct)</label>
+            <div class="mb-4">
+                <h6><label for="name" class="m-0">Output name (letters and numbers only):</label></h6>
+                <input type="text" id="name" class="form-control" name="name" maxlength="50" pattern="[a-zA-Z0-9]+">
+            </div>
 
-            <input type="submit" value="Submit" class="btn btn-block btn-primary mt-3">
+            <div class="mb-4">
+                <h6>Output size:</h6>
+                <input type="radio" id="full" name="size" value="full" checked="checked">
+                <label for="full" class="m-0"><b>1920x1080</b></label>
+                <br>
+                <input type="radio" id="thumb" name="size" value="thumb">
+                <label for="thumb" class="m-0"><b>220x150</b></label>
+            </div>
+
+            <div class="mb-4">
+                <h6>Resize type:</h6>
+                <input type="radio" id="crop" name="type" value="crop" checked="checked">
+                <label for="crop" class="m-0"><b>Crop</b> (recommended, cuts off the edges if aspect ratio is not correct)</label>
+                <br>
+                <input type="radio" id="fit" name="type" value="fit">
+                <label for="fit" class="m-0"><b>Fit</b> (stretches the image vertically or horizontally if aspect ratio is not correct)</label>
+            </div>
+
+            <input type="submit" value="Submit" class="btn btn-block btn-primary">
         </form>
     </div>
 
@@ -93,7 +110,7 @@
 
             $fileNameArray = explode('.', $img['name']);
             $fileExtension = end($fileNameArray);
-            $fileName = __DIR__ . DIRECTORY_SEPARATOR . 'thumb.' . $fileExtension;
+            $fileName = __DIR__ . DIRECTORY_SEPARATOR . 'img.' . $fileExtension;
 
             if(!in_array($fileExtension, $validExtensionArray))
             {
@@ -119,40 +136,60 @@
 
             if(!isset($error))
             {
+                if($_POST['size'] == 'full')
+                {
+                    $targetWidth = 1920;
+                    $targetHeight = 1080;
+                    $ratio = 1.78;
+                    $name = 'img';
+                }
+                else
+                {
+                    $targetWidth = 220;
+                    $targetHeight = 150;
+                    $ratio = 1.47;
+                    $name = 'thumb';
+                }
+
+                if(!empty($_POST['name']))
+                {
+                    $name = $_POST['name'];
+                }
+
                 if($_POST['type'] == 'crop')
                 {
                     $width = $imagick->getImageGeometry()['width'];
                     $height = $imagick->getImageGeometry()['height'];
 
-                    if($width / $height < 1.47)
+                    if($width / $height < $ratio)
                     {
-                        $imagick->resizeImage(220, null, null, 1);
+                        $imagick->resizeImage($targetWidth, null, null, 1);
                     }
                     else
                     {
-                        $imagick->resizeImage(null, 150, null, 1);
+                        $imagick->resizeImage(null, $targetHeight, null, 1);
                     }
 
                     $width = $imagick->getImageGeometry()['width'];
                     $height = $imagick->getImageGeometry()['height'];
 
-                    $imagick->cropImage(220, 150, ($width - 220) / 2, ($height - 150) / 2);
+                    $imagick->cropImage($targetWidth, $targetHeight, ($width - $targetWidth) / 2, ($height - $targetHeight) / 2);
                 }
                 elseif($_POST['type'] == 'fit')
                 {
-                    $imagick->resizeImage(220, 150, null, 1);
+                    $imagick->resizeImage($targetWidth, $targetHeight, null, 1);
                 }
 
                 $imagick->writeImage();
 
                 header("Content-Type: application/octet-stream");
                 header("Content-Transfer-Encoding: Binary");
-                header("Content-disposition: attachment; filename=\"thumb." . $fileExtension . "\"");
+                header("Content-disposition: attachment; filename=\"" . $name . "." . $fileExtension . "\"");
 
                 ob_clean();
                 flush();
 
-                readfile('http://localhost/tencent_thumb/thumb.' . $fileExtension);
+                readfile('http://localhost/tencent_thumb/img.' . $fileExtension);
 
                 unlink($fileName);
 
