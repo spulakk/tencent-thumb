@@ -99,7 +99,7 @@
 
     <?php
         require __DIR__ . '/vendor/autoload.php';
-var_dump($_SERVER['REMOTE_ADDR']);die;
+
         $error = null;
 
         if(!empty($_FILES['image']['name']))
