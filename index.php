@@ -62,7 +62,6 @@
         <div class="text-center">
             <p>Click the field and choose an image, then click "Submit" to resize it for use in Tencent competitions.</p>
             <p>Supported image formats: JPG, JPEG, PNG</p>
-            <p>In case of any issues, please contact <span class="text-primary">Pure Electricity#1796</span> on Discord.</p>
         </div>
 
         <form method="post" action="" enctype="multipart/form-data" id="image-form" class="my-5">
@@ -95,6 +94,10 @@
 
             <input type="submit" value="Submit" class="btn btn-block btn-primary">
         </form>
+
+        <div class="text-center">
+            <p>Github: <a href="https://github.com/spulakk/tencent-thumb" class="text-primary">spulakk/tencent-thumb</span></p>
+        </div>
     </div>
 
     <?php
