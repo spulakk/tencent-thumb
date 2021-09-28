@@ -96,7 +96,7 @@
         </form>
 
         <div class="text-center">
-            <p>Github: <a href="https://github.com/spulakk/tencent-thumb" class="text-primary">spulakk/tencent-thumb</span></p>
+            <p>Github: <a href="https://github.com/spulakk/tencent-thumb" target="_blank" class="text-primary">spulakk/tencent-thumb</span></p>
         </div>
     </div>
 
